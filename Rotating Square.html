@@ -1,0 +1,74 @@
+#include<stdio.h>
+#include<GL/GLUT.h>
+#include<math.h>
+int xmin = -250, xmax = 250, ymin = -250, ymax = 250, n = 60;
+float theta = 0;
+void myinit()
+{
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluOrtho2D(xmin, xmax, ymin, ymax);
+	glMatrixMode(GL_MODELVIEW);
+}
+void display()
+{
+	glClearColor(1, 1, 1, 1);
+	glClear(GL_COLOR_BUFFER_BIT);
+	glColor3f(1, 0.5, 0.5);
+	glBegin(GL_POLYGON);
+	glVertex2f(50 * cos(theta), 50 * sin(theta));
+	glVertex2f(-50 * sin(theta), 50 * cos(theta));
+	glVertex2f(-50 * cos(theta), -50 * sin(theta));
+	glVertex2f(50 * sin(theta), -50 * cos(theta));
+	glEnd();
+	glutSwapBuffers();
+	glFlush();
+}
+void idle()
+{
+	theta++;
+	if (theta >= 360)
+		theta -= 360;
+	glutPostRedisplay();
+}
+void myTimer(int v)
+{
+	theta++;
+	if (theta >= 360)
+		theta -= 360;
+	glutPostRedisplay();
+	glutTimerFunc(10, myTimer, v);
+}
+void mouse(int button, int state, int x, int y)
+{
+	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
+		//glutTimerFunc(10, myTimer, n);
+		glutIdleFunc(idle);
+	if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
+		glutIdleFunc(NULL);
+}
+void reshape(int w, int h)
+{
+	glViewport(0, 0, w, h);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	if (w > h)
+		gluOrtho2D(xmin * (float)w / (float)h, xmax * (float)w / (float)h, ymin, ymax);
+	else
+		gluOrtho2D(xmin, xmax, ymin * (float)h / (float)w, ymax * (float)h / (float)w);
+	glMatrixMode(GL_MODELVIEW);
+	glutPostRedisplay();
+}
+int main(int argc, char* argv[])
+{
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+	glutInitWindowPosition(0, 0);
+	glutInitWindowSize(500, 500);
+	glutInit(&argc, argv);
+	glutCreateWindow("Rotating Circle");
+	myinit();
+	glutDisplayFunc(display);
+	glutMouseFunc(mouse);
+	glutReshapeFunc(reshape);
+	glutMainLoop();
+}
